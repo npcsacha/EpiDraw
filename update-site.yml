@@ -1,0 +1,30 @@
+name: Upload Image to Assets Branch
+
+on:
+  push:
+    paths:
+      - 'images/**'
+
+jobs:
+  upload-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Switch to assets branch
+        run: |
+          git fetch origin assets || git checkout --orphan assets
+          git checkout assets
+          git pull origin assets || echo "No remote assets branch found, creating one."
+
+      - name: Move images to assets branch
+        run: |
+          mkdir -p images
+          mv ../images/* images/ || echo "No new images to move."
+          git add images/
+          git commit -m "Ajout de nouvelles images" || echo "Rien à committer"
+          git push origin assets
